@@ -1,58 +1,46 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-
-<body>
+<?php
+    include 'includes/nav.php'
+    ?>
     <?php
-
+    // echo htmlspecialchars($_POST['name']);
+    // echo "test";
     require_once('phpmailer/PHPMailerAutoload.php');
 
-    // if (isset($_POST['name']) && ($_POST['email'])) {
-    if (isset($_POST['submit'])) {
+    $mail = new PHPMailer(true);                              // Passing `true` enables exceptions
+    try {
         $name = $_POST['name'];
         $email = $_POST['email'];
-        $subject = $_POST['subject'];
-        $body = $_POST['message'];
+
+        //Server settings
+        $mail->SMTPDebug  = 0;                                 // Enable verbose debug output
+        $mail->isSMTP();                                      // Set mailer to use SMTP
+        $mail->Host = 'mail.privateemail.com';  // Specify main and backup SMTP servers
+        $mail->SMTPAuth = true;                               // Enable SMTP authentication
+        $mail->Username = 'ContactEmail';                 // SMTP username
+        $mail->Password = 'supersecretpassword';                           // SMTP password
+        $mail->SMTPSecure = 'ssl';                           // Enable TLS encryption, `ssl` also accepted
+        $mail->Port = 465;                                    // TCP port to connect to
+
+        //Recipients
+        $mail->setFrom('ContactEmail');
+        $mail->addAddress('re-routeemail');
+        $mail->addAddress($email);
+        // $mail->addAddress('');     // Add a recipient
 
 
 
-        $mail = new PHPMailer();
+        //Content
+        $mail->isHTML(true);                                  // Set email format to HTML
+        $mail->Subject = $_POST['subject'];
+        $mail->Body    = $_POST['message'];
 
-        $mail->isSMTP();
-        // $mail->SMTPDebug = 2;
-        $mail->Host = "mail.privateemail.com";
-        $mail->SMTPSecure = "ssl";
-        $mail->Port = 465;
-        $mail->SMTPAuth = true;
-        $mail->Username = 'YourEmailRouter';
-        $mail->Password = 'SuperSecretPassword';
-
-        //email settings
-        $mail->isHTML(true);
-        $mail->setFrom($email, $name);
-        $mail->addAddress("YourEmailRouter");
-        // $mail->$subject = ("$email ($subject)");
-        $mail->$subject = $subject;
-        $mail->Body = $body;
-        $mail->Send();
-        if (!$mail->send()) {
-            echo 'Message could not be sent.';
-            echo 'Mailer Error: ' . $mail->ErrorInfo;
-        } else {
-            echo 'Message has been sent';
-        }
-        // exit(json_encode(array("status" => $status, "response" => $response)));
-
+        $mail->send();
+        echo '<h2 class="emailSent">Page will redirect in 5 seconds. Email has been sent. You will recieve a copy in your email shortly.</h2>';
+        header('refresh: 5; url=https://www.ericpatterson.me/contact');
+        // header('Location: https://www.ericpatterson.me/contact');
+        exit();
+    } catch (Exception $e) {
+        echo '<h1 class="emailSent">Message could not be sent.</h1>';
+        echo 'Mailer Error: ' . $mail->ErrorInfo;
     }
-
     ?>
-
-</body>
-
-</html>
